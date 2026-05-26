@@ -1,0 +1,71 @@
+#pragma once
+
+#include <Arduino.h>
+#include "Config.h"
+#include "DataLogger.h"
+#include "DhtSensor.h"
+#include "IncubatorTypes.h"
+#include "LcdStatusDisplay.h"
+#include "OutputDevice.h"
+#include "ReadingHistory.h"
+#include "RealTimeClock.h"
+
+class IncubatorController {
+public:
+  IncubatorController(
+    DhtSensor& sensor,
+    OutputDevice& heater,
+    OutputDevice& bulb2,
+    OutputDevice& fan,
+    OutputDevice& turner,
+    RealTimeClock& clock,
+    DataLogger& logger,
+    LcdStatusDisplay& display
+  );
+
+  void begin();
+  void update();
+  void setNetworkStatus(const String& status);
+  void applySettings(const ControlSettings& settings);
+  void triggerTurnCycle();
+
+  ControlSettings settings() const;
+  String buildStatusJson(const String& wifiStatus, const String& ipAddress) const;
+
+private:
+  bool hasElapsed(uint32_t nowMs, uint32_t previousMs, uint32_t intervalMs) const;
+  void readSensorIfDue(uint32_t nowMs);
+  void updateOutputs(uint32_t nowMs);
+  void updateAutomaticOutputs();
+  void updateTurnerPulse(uint32_t nowMs);
+  void maybeStartScheduledTurn(uint32_t nowMs);
+  void refreshDisplayIfDue(uint32_t nowMs);
+
+  String temperatureSummary() const;
+  String humiditySummary() const;
+  String formatDuration(uint32_t durationMs) const;
+  String formatUptime(uint32_t timestampMs) const;
+  uint32_t nextTurnInMs(uint32_t nowMs) const;
+
+  DhtSensor& _sensor;
+  OutputDevice& _heater;
+  OutputDevice& _bulb2;
+  OutputDevice& _fan;
+  OutputDevice& _turner;
+  RealTimeClock& _clock;
+  DataLogger& _logger;
+  LcdStatusDisplay& _display;
+  ReadingHistory _history;
+  ControlSettings _settings;
+  SensorReading _currentReading;
+  bool _hasReadSensor = false;
+  bool _hasTurned = false;
+  uint32_t _startedMs = 0;
+  uint32_t _lastSensorReadMs = 0;
+  uint32_t _lastDisplayRefreshMs = 0;
+  uint32_t _lastTurnMs = 0;
+  uint32_t _turnerStopMs = 0;
+  String _networkStatus = "Offline";
+  String _lastReadingTimestamp = "Not set";
+  String _lastAnomaly = "None";
+};

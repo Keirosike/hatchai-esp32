@@ -1,0 +1,231 @@
+.settings-page {
+  max-width: 1100px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.title h1 {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.title p {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.wide-card {
+  grid-column: span 2;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.account-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card-bg);
+  margin-bottom: 18px;
+}
+
+.avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.account-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
+.account-info p {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.password-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.password-wrap .input-box,
+.password-wrap .btn {
+  margin-top: 8px;
+}
+
+.password-wrap .btn {
+  flex-shrink: 0;
+}
+
+.wifi-scan-box {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--card-bg);
+}
+
+.wifi-scan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.wifi-scan-header strong {
+  font-size: 15px;
+  color: var(--black);
+}
+
+.wifi-network-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wifi-network-list li {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.wifi-network-list button {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--black);
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  text-align: left;
+  transition: 0.2s ease;
+}
+
+.wifi-network-list button:hover {
+  background: var(--bg-soft);
+  color: var(--orange);
+  border-color: var(--orange-border);
+}
+
+.wifi-network-list span {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wifi-status-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.wifi-info-box {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--card-bg);
+}
+
+.wifi-info-box p {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 8px;
+}
+
+.wifi-info-box h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.small-note {
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+#saveStatus {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--gray);
+}
+
+@media (max-width: 900px) {
+  .settings-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide-card {
+    grid-column: span 1;
+  }
+
+  .wifi-status-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .title h1 {
+    font-size: 24px;
+  }
+
+  .badge {
+    width: 100%;
+    text-align: center;
+  }
+
+  .account-box {
+    align-items: flex-start;
+  }
+
+  .password-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

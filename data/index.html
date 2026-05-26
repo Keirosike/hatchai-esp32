@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>HatchAI Login</title>
+  <link rel="icon" href="/assets/images/fortitle.webp" type="image/webp" />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+
+<body>
+  <main class="login-page">
+    <section class="login-info">
+      <div class="brand-mark">
+        <img src="/assets/images/hatchai-logo.webp" alt="HatchAI Logo" />
+        <span>Hatch<span>AI</span></span>
+      </div>
+
+      <h1>
+        Manage your
+        <span>smart hatch system</span>
+      </h1>
+
+      <p class="info-text">
+        HatchAI is an ESP32-based local incubator monitoring and control system.
+        It helps authorized users monitor incubation conditions, manage hatchery
+        data, and access device responses directly through a local dashboard.
+      </p>
+
+      <div class="info-cards">
+        <article class="info-card">
+          <div class="icon-box">
+            <img src="assets/icons/shield.svg" alt="" />
+          </div>
+          <h2>Secure Access</h2>
+          <p>
+            The login page protects the local dashboard so only permitted users
+            can access the incubator system.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="icon-box">
+            <img src="assets/icons/cpu.svg" alt="" />
+          </div>
+          <h2>Edge Processing</h2>
+          <p>
+            Data is processed locally on the ESP32, reducing delay and supporting
+            operation without depending on a cloud server.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="login-card" aria-labelledby="loginTitle">
+      <div class="login-logo-wrap">
+        <img src="assets/images/hatchai-logo.webp" alt="HatchAI Logo" class="login-logo" />
+      </div>
+
+      <h2 id="loginTitle">Login</h2>
+      <p class="login-subtitle">Enter your username and password</p>
+
+      <form id="loginForm" class="login-form" novalidate>
+        <div class="input-group">
+          <label for="username">Username</label>
+          <div class="input-box">
+            <img src="assets/icons/user.svg" alt="" class="input-icon" />
+            <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" required />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="input-box">
+            <img src="assets/icons/lock.svg" alt="" class="input-icon" />
+            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required />
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn">Sign In</button>
+
+        <p id="status" class="status" aria-live="polite"></p>
+      </form>
+
+      <div class="login-footer">
+        Local access only
+      </div>
+    </section>
+  </main>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

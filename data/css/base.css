@@ -1,0 +1,42 @@
+:root {
+  --orange: #D97706;
+  --dark-orange: #B45309;
+  --black: #111827;
+  --gray: #4B5563;
+  --border: #E5E7EB;
+  --white: #FFFFFF;
+  --bg-soft: #FFF7ED;
+  --green: #16A34A;
+  --blue: #2563EB;
+  --red: #DC2626;
+  --red-soft: #FEE2E2;
+  --red-border: #FCA5A5;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+body {
+  background: var(--white);
+  color: var(--black);
+}

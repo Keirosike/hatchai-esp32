@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HatchAI Logs</title>
+  <link rel="icon" href="fortitle.webp" type="image/webp" />
+
+  <style>
+    :root{
+      --orange: #D97706;
+      --dark-orange: #B45309;
+      --black: #111827;
+      --gray: #4B5563;
+      --border: #E5E7EB;
+      --white: #FFFFFF;
+      --bg-soft: #FFF7ED;
+      --green: #16A34A;
+      --red: #DC2626;
+      --yellow: #CA8A04;
+      --blue: #2563EB;
+      --blue-soft: #EFF6FF;
+    }
+
+    @font-face {
+      font-family: 'Inter';
+      src: url('/font/inter-regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Inter';
+      src: url('/font/inter-semibold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+    }
+
+    .navbar {
+      width: 100%;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .logo-wrap img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--black);
+      white-space: nowrap;
+    }
+
+    .logo span {
+      color: var(--orange);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .nav-links li a {
+      text-decoration: none;
+      font-size: 14px;
+      color: var(--gray);
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: 0.2s ease;
+      display: block;
+    }
+
+    .nav-links li a:hover {
+      background: var(--bg-soft);
+      color: var(--orange);
+    }
+
+    .nav-links li a.active {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--gray);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .hamburger {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 10px;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+    }
+
+    .hamburger span {
+      width: 20px;
+      height: 2px;
+      background: var(--black);
+      border-radius: 999px;
+      transition: 0.3s;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .logs-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px 32px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .title h1 {
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 6px;
+    }
+
+    .title p {
+      font-size: 14px;
+      color: var(--gray);
+    }
+
+    .badge {
+      background: var(--bg-soft);
+      color: var(--orange);
+      border: 1px solid #FED7AA;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
+    }
+
+    .card-title {
+      font-size: 15px;
+      color: var(--gray);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--black);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .subtext {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    .logs-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 18px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .input-box,
+    .select-box {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--black);
+      outline: none;
+      background: var(--white);
+    }
+
+    .input-box:focus,
+    .select-box:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--dark-orange);
+    }
+
+    .btn-soft {
+      background: var(--bg-soft);
+      color: var(--orange);
+      border: 1px solid #FED7AA;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .log-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--white);
+    }
+
+    .log-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .log-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--black);
+    }
+
+    .log-time {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    .log-desc {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .chip-info {
+      background: #E0F2FE;
+      color: #0369A1;
+    }
+
+    .chip-success {
+      background: #DCFCE7;
+      color: var(--green);
+    }
+
+    .chip-warning {
+      background: #FEF3C7;
+      color: var(--yellow);
+    }
+
+    .chip-danger {
+      background: #FEE2E2;
+      color: var(--red);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+      background: var(--white);
+    }
+
+    thead {
+      background: #FFFBF7;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--gray);
+      font-weight: 600;
+    }
+
+    td {
+      color: var(--black);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-normal {
+      background: #DCFCE7;
+      color: var(--green);
+    }
+
+    .status-alert {
+      background: #FEE2E2;
+      color: var(--red);
+    }
+
+    .status-review {
+      background: #DBEAFE;
+      color: var(--blue);
+    }
+
+    @media (max-width: 900px) {
+      .overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .logs-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .hamburger {
+        display: flex;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 14px;
+        right: 14px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(17, 24, 39, 0.10);
+        padding: 10px;
+        gap: 8px;
+        flex-direction: column;
+        align-items: stretch;
+        display: none;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .logs-page {
+        padding: 18px 14px 28px;
+      }
+
+      .nav-container {
+        padding: 14px;
+      }
+
+      .title h1 {
+        font-size: 24px;
+      }
+
+      .badge {
+        width: 100%;
+        text-align: center;
+      }
+
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-row {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo-wrap">
+        <img src="hatchai-logo.webp" alt="HatchAI Logo">
+        <div class="logo">Hatch<span>AI</span></div>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="control.html">Control</a></li>
+        <li><a href="batch.html">Batch</a></li>
+        <li><a href="log.html" class="active">Logs</a></li>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+
+      <div class="nav-status">
+        <span class="dot"></span>
+        <span id="wifiStatus">Online</span>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="logs-page">
+    <div class="topbar">
+      <div class="title">
+        <h1>System Logs</h1>
+        <p>Track incubator events, alerts, sensor history, and control actions</p>
+      </div>
+      <div class="badge">Live Activity Records</div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="card">
+        <div class="card-title">Total Events Today</div>
+        <div class="card-value" id="totalEvents">28</div>
+        <div class="subtext">All recorded actions and readings</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Warnings</div>
+        <div class="card-value" id="warningCount">3</div>
+        <div class="subtext">Conditions that need review</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Critical Alerts</div>
+        <div class="card-value" id="criticalCount">0</div>
+        <div class="subtext">No high-priority failures detected</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Last Sync</div>
+        <div class="card-value" id="lastSync">10:42</div>
+        <div class="subtext">Most recent dashboard refresh</div>
+      </div>
+    </div>
+
+    <div class="logs-layout">
+      <div class="card">
+        <div class="card-title">Log Filters</div>
+        <div class="subtext">Filter entries by type, date, or keyword.</div>
+
+        <div class="filter-grid">
+          <select class="select-box" id="logType">
+            <option value="all">All Types</option>
+            <option value="sensor">Sensor</option>
+            <option value="control">Control</option>
+            <option value="warning">Warning</option>
+            <option value="system">System</option>
+          </select>
+
+          <select class="select-box" id="logRange">
+            <option value="today">Today</option>
+            <option value="12h">Last 12 Hours</option>
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+          </select>
+
+          <input type="date" class="input-box" id="logDate">
+          <input type="text" class="input-box" id="logSearch" placeholder="Search logs...">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+          <button class="btn btn-soft" onclick="resetFilters()">Reset</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Module</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="miniLogTable">
+              <tr>
+                <td>10:42 AM</td>
+                <td>Wi-Fi Sync</td>
+                <td><span class="status-pill status-normal">Success</span></td>
+              </tr>
+              <tr>
+                <td>10:20 AM</td>
+                <td>Motor</td>
+                <td><span class="status-pill status-review">Rotation</span></td>
+              </tr>
+              <tr>
+                <td>09:55 AM</td>
+                <td>Humidity</td>
+                <td><span class="status-pill status-normal">Stable</span></td>
+              </tr>
+              <tr>
+                <td>09:30 AM</td>
+                <td>Temperature</td>
+                <td><span class="status-pill status-alert">Spike</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent Activity</div>
+        <div class="subtext">Latest logs from the incubator and control system.</div>
+
+        <div class="timeline" id="logTimeline">
+          <div class="log-item">
+            <div class="log-head">
+              <div>
+                <div class="log-title">Temperature spike detected</div>
+                <div class="log-time">09:30 AM</div>
+              </div>
+            </div>
+            <div class="log-desc">Sensor recorded a short increase above the preferred range. System automatically corrected relay behavior.</div>
+            <span class="chip chip-warning">Warning</span>
+          </div>
+
+          <div class="log-item">
+            <div class="log-head">
+              <div>
+                <div class="log-title">Egg rotation completed</div>
+                <div class="log-time">10:20 AM</div>
+              </div>
+            </div>
+            <div class="log-desc">Motor completed a scheduled rotation cycle successfully with no interruption.</div>
+            <span class="chip chip-success">Control</span>
+          </div>
+
+          <div class="log-item">
+            <div class="log-head">
+              <div>
+                <div class="log-title">Humidity reading normalized</div>
+                <div class="log-time">09:55 AM</div>
+              </div>
+            </div>
+            <div class="log-desc">Humidity returned to the expected range after minor fluctuation.</div>
+            <span class="chip chip-info">Sensor</span>
+          </div>
+
+          <div class="log-item">
+            <div class="log-head">
+              <div>
+                <div class="log-title">Dashboard sync completed</div>
+                <div class="log-time">10:42 AM</div>
+              </div>
+            </div>
+            <div class="log-desc">Latest ESP32 data fetched and rendered successfully on the dashboard.</div>
+            <span class="chip chip-success">System</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById("hamburger");
+    const navLinks = document.getElementById("navLinks");
+
+    hamburger.addEventListener("click", () => {
+      hamburger.classList.toggle("active");
+      navLinks.classList.toggle("active");
+    });
+
+    document.querySelectorAll("#navLinks a").forEach(link => {
+      link.addEventListener("click", () => {
+        hamburger.classList.remove("active");
+        navLinks.classList.remove("active");
+      });
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 700) {
+        hamburger.classList.remove("active");
+        navLinks.classList.remove("active");
+      }
+    });
+
+    function applyFilters() {
+      alert("Filters applied. You can connect this to real ESP32 or backend log data later.");
+    }
+
+    function resetFilters() {
+      document.getElementById("logType").value = "all";
+      document.getElementById("logRange").value = "today";
+      document.getElementById("logDate").value = "";
+      document.getElementById("logSearch").value = "";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>HatchAI Batch CRUD</title>
+  <link rel="icon" href="assets/images/fortitle.webp" type="image/webp" />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/toastNotification.css" />
+  <link rel="stylesheet" href="css/batch.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo-wrap">
+        <img src="assets/images/hatchai-logo.webp" alt="HatchAI Logo">
+        <div class="logo">Hatch<span>AI</span></div>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="control.html">Control</a></li>
+        <li><a href="batch.html" class="active">Batch</a></li>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+
+      <div class="nav-status">
+        <span class="dot"></span>
+        <span id="wifiStatus">Online</span>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page batch">
+    <div class="topbar">
+      <div class="title">
+        <h1>Batch Management</h1>
+        <p>Create, view, update, and delete incubator egg batches</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary add-batch-btn" type="button" id="openBatchModal">
+          <span class="plus-icon">+</span>
+          Add Batch
+        </button>
+      </div>
+    </div>
+
+    <section class="grid batch-grid">
+      <div class="card batch-hero-card">
+        <div>
+          <div class="card-title">Current Active Batch</div>
+          <div class="batch-name" id="currentBatchName">No active batch</div>
+          <div class="subtext" id="currentBatchMeta">Add a batch to start tracking incubation progress.</div>
+        </div>
+
+        <div>
+          <div class="card-title">Incubation Progress</div>
+
+          <div class="progress-wrap" aria-label="Batch progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+
+          <div class="progress-meta">
+            <span id="progressPercent">0% complete</span>
+            <span id="daysRemaining">No batch selected</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid">
+      <div class="card">
+        <div class="card-title">Batch Summary</div>
+
+        <ul class="mini-list">
+          <li>
+            <span>Selected batch</span>
+            <strong id="summaryBatch">None</strong>
+          </li>
+          <li>
+            <span>Egg type</span>
+            <strong id="summaryType">None</strong>
+          </li>
+          <li>
+            <span>Egg count</span>
+            <strong id="summaryCount">0 eggs</strong>
+          </li>
+          <li>
+            <span>Started</span>
+            <strong id="summaryStarted">Not set</strong>
+          </li>
+          <li>
+            <span>Expected hatch</span>
+            <strong id="summaryHatch">Not set</strong>
+          </li>
+          <li>
+            <span>Status</span>
+            <strong id="summaryStatus">
+              <span class="status-pill status-warning">No Data</span>
+            </strong>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Incubator Batch Records</div>
+          <p class="subtext">Records are saved in your browser using localStorage</p>
+        </div>
+
+        <span class="status-pill status-ok" id="activeCountBadge">0 Active</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="batch-table">
+          <thead>
+            <tr>
+              <th>Batch</th>
+              <th>Egg Type</th>
+              <th>Eggs</th>
+              <th>Start Date</th>
+              <th>Expected Hatch</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="batchTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="hatchToast" role="status" aria-live="polite"></div>
+
+  <div class="batch-modal-overlay" id="batchModal" aria-hidden="true">
+    <div class="batch-modal" role="dialog" aria-modal="true" aria-labelledby="batchModalTitle">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2 id="batchModalTitle">Add Batch</h2>
+          <p id="batchModalDescription">Enter the details for the batch running in your incubator.</p>
+        </div>
+
+        <button class="close-btn" type="button" id="closeBatchModal" aria-label="Close batch form">&times;</button>
+      </div>
+
+      <div class="card-header">
+        <div class="card-title">Batch Form</div>
+        <span class="status-pill status-ok" id="formStatus">Ready</span>
+      </div>
+
+      <form class="batch-form-grid" id="batchForm">
+        <input type="hidden" id="batchId">
+
+        <div class="field">
+          <label for="batchName">Batch Name</label>
+          <input type="text" id="batchName" placeholder="Example: Batch A-0426" required>
+        </div>
+
+        <div class="field">
+          <label for="eggType">Egg Type</label>
+          <select id="eggType">
+            <option>Chicken</option>
+            <option>Duck</option>
+            <option>Quail</option>
+            <option>Goose</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="eggCount">Number of Eggs</label>
+          <input type="number" id="eggCount" min="1" placeholder="36" required>
+        </div>
+
+        <div class="field">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" required>
+        </div>
+
+        <div class="field">
+          <label for="targetTemp">Target Temperature</label>
+          <input type="text" id="targetTemp" placeholder="37.8°C">
+        </div>
+
+        <div class="field">
+          <label for="targetHumidity">Target Humidity</label>
+          <input type="text" id="targetHumidity" placeholder="58%">
+        </div>
+
+        <div class="field">
+          <label for="batchStatus">Status</label>
+          <select id="batchStatus">
+            <option>Active</option>
+            <option>Completed</option>
+            <option>Paused</option>
+            <option>Failed</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="isSelected">Show on Dashboard Summary</label>
+          <select id="isSelected">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="batchNotes">Notes</label>
+          <textarea id="batchNotes" placeholder="Add batch notes here"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-soft" type="button" id="resetFormBtn">Reset Form</button>
+          <button class="btn btn-primary" type="submit" id="saveBatchBtn">Save Batch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="confirmModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-icon">!</div>
+      <h2 id="modalTitle">Are you sure?</h2>
+      <p id="modalMessage">This action cannot be undone.</p>
+
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-danger" type="button" id="modalConfirmBtn">Confirm</button>
+        <button class="modal-btn modal-btn-cancel" type="button" id="modalCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/toastNotification.js"></script>
+  <script src="js/batch.js"></script>
+</body>
+</html>

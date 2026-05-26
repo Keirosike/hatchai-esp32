@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>HatchAI Settings</title>
+  <link rel="icon" href="assets/images/fortitle.webp" type="image/webp" />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/settings.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/toastNotification.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo-wrap">
+        <img src="assets/images/hatchai-logo.webp" alt="HatchAI Logo" />
+        <div class="logo">Hatch<span>AI</span></div>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="control.html">Control</a></li>
+        <li><a href="batch.html">Batch</a></li>
+        <li><a href="settings.html" class="active">Settings</a></li>
+      </ul>
+
+      <div class="nav-status">
+        <span class="dot"></span>
+        <span id="wifiStatus">Online</span>
+      </div>
+
+      <button
+        class="hamburger"
+        id="hamburger"
+        type="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="navLinks"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page settings-page">
+    <section class="topbar">
+      <div class="title">
+        <h1>System Settings</h1>
+        <p>Manage account, sensor calibration, Wi-Fi connection, and saved settings.</p>
+      </div>
+
+      <div class="badge">Configuration Panel</div>
+    </section>
+
+    <section class="settings-grid">
+      <!-- USER ACCOUNT -->
+      <article class="card wide-card">
+        <h2 class="card-title">User Account</h2>
+        <p class="subtext">Manage the account used to access the HatchAI dashboard.</p>
+
+        <div class="account-box">
+          <div class="avatar" id="accountAvatar">A</div>
+
+          <div class="account-info">
+            <h3 id="accountDisplayName">Admin User</h3>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" class="input-box" value="Admin User" />
+          </div>
+
+          <div class="field-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="input-box" value="admin" />
+          </div>
+
+          <div class="field-group">
+            <label for="newPassword">New Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              class="input-box"
+              placeholder="Enter new password"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              class="input-box"
+              placeholder="Confirm new password"
+            />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" id="saveAccountBtn">
+            Save Account
+          </button>
+
+          <button class="btn btn-soft" type="button" id="resetAccountBtn">
+            Reset Account
+          </button>
+        </div>
+      </article>
+
+      <!-- SENSOR CALIBRATION -->
+      <article class="card wide-card sensor-card">
+        <h2 class="card-title">Sensor Calibration</h2>
+        <p class="subtext">Adjust readings if your sensor is not accurate.</p>
+
+        <div class="field-group">
+          <label for="temperatureOffset">Temperature Offset (°C)</label>
+          <input
+            type="number"
+            id="temperatureOffset"
+            class="input-box"
+            value="0.0"
+            step="0.1"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="humidityOffset">Humidity Offset (%)</label>
+          <input
+            type="number"
+            id="humidityOffset"
+            class="input-box"
+            value="0"
+            step="1"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="calibrationNote">Calibration Notes</label>
+          <textarea
+            id="calibrationNote"
+            class="textarea-box"
+            placeholder="Example: Sensor reads 0.3°C lower than thermometer..."
+          ></textarea>
+        </div>
+      </article>
+
+      <!-- ESP32 WI-FI CONNECTION -->
+      <article class="card wide-card">
+        <h2 class="card-title">ESP32 Wi-Fi Connection</h2>
+        <p class="subtext">Connect the ESP32 controller to your Wi-Fi network.</p>
+
+        <div class="wifi-scan-box">
+          <div class="wifi-scan-header">
+            <strong>Available Wi-Fi Networks</strong>
+
+            <button class="btn btn-soft" type="button" id="scanWifiBtn">
+              Scan Wi-Fi
+            </button>
+          </div>
+
+          <ul class="wifi-network-list" id="wifiNetworkList">
+            <li>No scan yet. Connect to the ESP32 setup Wi-Fi first, then click Scan Wi-Fi.</li>
+          </ul>
+        </div>
+
+        <div class="wifi-status-row">
+          <div class="wifi-info-box">
+            <p>ESP32 Wi-Fi Status</p>
+            <h3>
+              <span class="status-pill status-alert" id="espWifiBadge">
+                Disconnected
+              </span>
+            </h3>
+          </div>
+
+          <div class="wifi-info-box">
+            <p>ESP32 IP Address</p>
+            <h3 id="espIpAddress">---</h3>
+          </div>
+
+          <div class="wifi-info-box">
+            <p>Signal Strength</p>
+            <h3 id="espSignal">---</h3>
+          </div>
+        </div>
+
+        <p class="small-note">
+          ESP32 setup mode should expose endpoints at <strong>192.168.4.1</strong>.
+        </p>
+      </article>
+
+      <!-- SAVE PANEL -->
+      <article class="card wide-card">
+        <h2 class="card-title">Save Configuration</h2>
+        <p class="subtext">
+          Save your settings locally in the browser. Use backend storage later for real deployment.
+        </p>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" id="saveSettingsBtn">
+            Save Settings
+          </button>
+
+          <button class="btn btn-soft" type="button" id="resetSettingsBtn">
+            Reset Defaults
+          </button>
+
+          <button class="btn btn-danger" type="button" id="logoutBtn">
+            Logout
+          </button>
+        </div>
+
+        <div id="saveStatus">No changes saved yet.</div>
+      </article>
+    </section>
+  </main>
+
+  <div class="toast" id="hatchToast" role="status" aria-live="polite"></div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="confirmModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-icon">!</div>
+
+      <h2 id="modalTitle">Are you sure?</h2>
+
+      <p id="modalMessage">
+        This action cannot be undone.
+      </p>
+
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-danger" type="button" id="modalConfirmBtn">
+          Confirm
+        </button>
+
+        <button class="modal-btn modal-btn-cancel" type="button" id="modalCancelBtn">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/wifi.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/toastNotification.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
