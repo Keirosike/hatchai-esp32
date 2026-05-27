@@ -22,10 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function validateLogin(username, password) {
-    return username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD;
+    const savedAccount = window.HatchStorage?.get("hatchaiAccount", null);
+    const savedPassword = window.HatchStorage?.get("hatchaiPassword", null);
+    const validUsername = savedAccount?.username || DEFAULT_USERNAME;
+    const validPassword = savedPassword || DEFAULT_PASSWORD;
+
+    return username === validUsername && password === validPassword;
   }
 
-  loginForm.addEventListener("submit", event => {
+  loginForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     clearStatus();
@@ -40,6 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!validateLogin(username, password)) {
       showStatus("Invalid username or password.", "error");
+      return;
+    }
+
+    const session = await window.HatchAuthSession.start(username);
+
+    if (!session.ok) {
+      showStatus(session.message, "error");
       return;
     }
 

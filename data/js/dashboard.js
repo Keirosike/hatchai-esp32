@@ -530,10 +530,10 @@ document.addEventListener("DOMContentLoaded", function () {
     setText("relayBadge", data.relayBadge || "Bulbs Idle");
     setText("motorValue", data.motorStatus || "Idle");
     setText("motorSubtext", data.motorNote || "Waiting for ESP32 data");
-    setText("hatchDayValue", data.predictedDay || "Training pending");
+    setText("hatchDayValue", data.predictedDay || "Waiting for data");
     setText(
       "hatchDateValue",
-      data.hatchDate || "Prediction skipped until dataset training is ready"
+      data.hatchDate || "Waiting for ESP32 sensor data"
     );
     setText("lastUpdated", "Last updated: " + (data.lastUpdated || "--"));
     setText("summaryTemp", data.summaryTemp || "No Data");
@@ -553,6 +553,50 @@ document.addEventListener("DOMContentLoaded", function () {
       relayBadge.className =
         "status-pill " + (data.relayOn ? "status-on" : "status-off");
     }
+
+    updateDashboardBatchData(data);
+  }
+
+  function hasEspPrediction(value) {
+    const text = String(value || "").toLowerCase();
+    return Boolean(value && !text.includes("waiting") && !text.includes("random forest"));
+  }
+
+  function updateDashboardBatchData(data = {}) {
+    if (!window.HatchBatchStore) return;
+
+    const batches = HatchBatchStore.loadBatches();
+    const selectedBatch = HatchBatchStore.getSelectedBatch(batches);
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    if (!selectedBatch) {
+      setText("activeBatchValue", "No batch selected");
+      setText("dashboardLaidDate", "Not set");
+      setText("dashboardStartDate", "Not set");
+      setText("dashboardExpectedHatch", "Not set");
+      setText("dashboardBatchProgress", "0% complete");
+      return;
+    }
+
+    const batchInfo = HatchBatchStore.calculateBatch(selectedBatch);
+    const modelDay = hasEspPrediction(data.predictedDay)
+      ? data.predictedDay
+      : batchInfo.dayText;
+    const modelDate = hasEspPrediction(data.hatchDate)
+      ? "ESP32 model: " + data.hatchDate
+      : "Batch estimate: " + batchInfo.hatchDate;
+
+    setText("hatchDayValue", modelDay);
+    setText("hatchDateValue", modelDate);
+    setText("activeBatchValue", selectedBatch.name + " (" + selectedBatch.count + " eggs)");
+    setText("dashboardLaidDate", HatchBatchStore.formatDate(selectedBatch.laidDate));
+    setText("dashboardStartDate", HatchBatchStore.formatDate(selectedBatch.startDate));
+    setText("dashboardExpectedHatch", batchInfo.hatchDate);
+    setText("dashboardBatchProgress", batchInfo.progress + "% complete, " + batchInfo.daysRemaining);
   }
 
   function loadSampleData() {
@@ -564,8 +608,8 @@ document.addEventListener("DOMContentLoaded", function () {
       relayOn: true,
       motorStatus: "Idle",
       motorNote: "Next egg turning in 1 hr 20 min",
-      predictedDay: "Training pending",
-      hatchDate: "Prediction skipped until dataset training is ready",
+      predictedDay: "Random Forest",
+      hatchDate: "Waiting for ESP32 sensor data",
       lastUpdated: "10:42 AM",
       summaryTemp: "Stable",
       summaryHumidity: "Normal",

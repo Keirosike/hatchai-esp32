@@ -7,7 +7,7 @@ namespace HatchConfig {
 constexpr uint32_t SerialBaud = 115200;
 constexpr uint16_t WebServerPort = 80;
 
-// Replace these with your router details. If left unchanged, the ESP32 starts
+
 // its own Wi-Fi access point named HatchAI-ESP32.
 constexpr const char* WifiSsid = "YOUR_WIFI_SSID";
 constexpr const char* WifiPassword = "YOUR_WIFI_PASSWORD";

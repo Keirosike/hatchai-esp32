@@ -2,6 +2,10 @@
 #include <FS.h>
 #include <SPIFFS.h>
 
+namespace {
+constexpr unsigned long SessionTimeoutMs = 90000;
+}
+
 HatchWebServer::HatchWebServer(
   IncubatorController& controller,
   NetworkManager& network
@@ -23,10 +27,22 @@ void HatchWebServer::registerRoutes() {
   _server.on("/api/control", HTTP_OPTIONS, [this]() { handleOptions(); });
   _server.on("/api/turn", HTTP_POST, [this]() { handleApiTurn(); });
   _server.on("/api/turn", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/api/session/start", HTTP_POST, [this]() { handleSessionStart(); });
+  _server.on("/api/session/start", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/api/session/keepalive", HTTP_POST, [this]() { handleSessionKeepAlive(); });
+  _server.on("/api/session/keepalive", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/api/session/end", HTTP_POST, [this]() { handleSessionEnd(); });
+  _server.on("/api/session/end", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/api/session/status", HTTP_GET, [this]() { handleSessionStatus(); });
+  _server.on("/api/session/status", HTTP_OPTIONS, [this]() { handleOptions(); });
   _server.on("/scan-wifi", HTTP_GET, [this]() { handleWifiScan(); });
   _server.on("/scan-wifi", HTTP_OPTIONS, [this]() { handleOptions(); });
   _server.on("/api/wifi/scan", HTTP_GET, [this]() { handleWifiScan(); });
   _server.on("/api/wifi/scan", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/api/wifi/connect", HTTP_POST, [this]() { handleWifiConnect(); });
+  _server.on("/api/wifi/connect", HTTP_OPTIONS, [this]() { handleOptions(); });
+  _server.on("/connect-wifi", HTTP_POST, [this]() { handleWifiConnect(); });
+  _server.on("/connect-wifi", HTTP_OPTIONS, [this]() { handleOptions(); });
   _server.onNotFound([this]() { handleStaticFile(); });
 }
 
@@ -59,8 +75,74 @@ void HatchWebServer::handleApiTurn() {
   sendJson(_controller.buildStatusJson(_network.statusText(), _network.ipAddress()));
 }
 
+void HatchWebServer::handleSessionStart() {
+  const String token = _server.hasArg("token") ? _server.arg("token") : "";
+  const String username = _server.hasArg("username") ? _server.arg("username") : "user";
+
+  if (token.length() < 8) {
+    sendJson("{\"ok\":false,\"message\":\"Invalid session token\"}", 400);
+    return;
+  }
+
+  if (hasActiveSession() && _sessionToken != token) {
+    sendJson(
+      "{\"ok\":false,\"locked\":true,\"message\":\"Another user is already logged in\"}",
+      409
+    );
+    return;
+  }
+
+  refreshSession(token, username);
+  sendJson("{\"ok\":true,\"locked\":false,\"message\":\"Session started\"}");
+}
+
+void HatchWebServer::handleSessionKeepAlive() {
+  const String token = _server.hasArg("token") ? _server.arg("token") : "";
+
+  if (!hasActiveSession()) {
+    sendJson("{\"ok\":false,\"active\":false,\"message\":\"Session expired\"}", 401);
+    return;
+  }
+
+  if (_sessionToken != token) {
+    sendJson("{\"ok\":false,\"locked\":true,\"message\":\"Session belongs to another user\"}", 409);
+    return;
+  }
+
+  refreshSession(_sessionToken, _sessionUsername);
+  sendJson("{\"ok\":true,\"active\":true,\"message\":\"Session refreshed\"}");
+}
+
+void HatchWebServer::handleSessionEnd() {
+  const String token = _server.hasArg("token") ? _server.arg("token") : "";
+
+  if (_sessionToken == token || !hasActiveSession()) {
+    _sessionToken = "";
+    _sessionUsername = "";
+    _sessionLastSeenMs = 0;
+  }
+
+  sendJson("{\"ok\":true,\"active\":false,\"message\":\"Session ended\"}");
+}
+
+void HatchWebServer::handleSessionStatus() {
+  if (!hasActiveSession()) {
+    sendJson("{\"active\":false,\"locked\":false}");
+    return;
+  }
+
+  sendJson("{\"active\":true,\"locked\":true}");
+}
+
 void HatchWebServer::handleWifiScan() {
   sendJson(_network.scanNetworksJson());
+}
+
+void HatchWebServer::handleWifiConnect() {
+  const String ssid = _server.hasArg("ssid") ? _server.arg("ssid") : "";
+  const String password = _server.hasArg("password") ? _server.arg("password") : "";
+
+  sendJson(_network.connectToWifi(ssid, password));
 }
 
 void HatchWebServer::handleOptions() {
@@ -174,4 +256,18 @@ uint16_t HatchWebServer::parseMinutesArg(
   }
 
   return static_cast<uint16_t>(minutes);
+}
+
+bool HatchWebServer::hasActiveSession() const {
+  if (_sessionToken.length() == 0) {
+    return false;
+  }
+
+  return millis() - _sessionLastSeenMs < SessionTimeoutMs;
+}
+
+void HatchWebServer::refreshSession(const String& token, const String& username) {
+  _sessionToken = token;
+  _sessionUsername = username;
+  _sessionLastSeenMs = millis();
 }

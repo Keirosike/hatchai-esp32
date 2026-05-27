@@ -14,13 +14,8 @@ public:
   void showBoot(const String& message);
   void showStatus(
     const SensorReading& reading,
-    const ControlSettings& settings,
-    const String& clockText,
-    const String& wifiStatus,
-    const String& sdStatus,
-    bool heaterOn,
-    bool fanOn,
-    bool turnerOn
+    bool turnerOn,
+    const String& hatchDateText
   );
 
 private:

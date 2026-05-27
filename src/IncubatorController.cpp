@@ -1,5 +1,10 @@
 #include "IncubatorController.h"
 #include "JsonBuilder.h"
+#include "random_forest_hatch_model_esp32.h"
+
+namespace {
+Eloquent::ML::Port::RandomForestRegressor hatchModel;
+}
 
 IncubatorController::IncubatorController(
   DhtSensor& sensor,
@@ -87,6 +92,8 @@ String IncubatorController::buildStatusJson(
   const bool heatingOn = _heater.isOn() || _bulb2.isOn();
   const uint32_t nowMs = millis();
   const uint32_t nextTurnMs = nextTurnInMs(nowMs);
+  const int predictedDay = predictedHatchDay();
+  const String predictedDate = predictedHatchDateIso();
 
   String json = "{";
   json += "\"temperature\":";
@@ -118,9 +125,15 @@ String IncubatorController::buildStatusJson(
   }
 
   json += ",";
-  json += "\"predictedDay\":\"Training pending\",";
-  json += "\"hatchDate\":\"Prediction skipped until dataset training is ready\",";
-  json += "\"predictionStatus\":\"training_pending\",";
+  json += "\"predictedDay\":";
+  json += HatchJson::quote(predictedDay > 0 ? String("Day ") + String(predictedDay) : "Waiting for data");
+  json += ",";
+  json += "\"hatchDate\":";
+  json += HatchJson::quote(predictedDate.length() > 0 ? String("Predicted hatch date: ") + predictedDate : "Waiting for sensor and RTC data");
+  json += ",";
+  json += "\"predictionStatus\":";
+  json += HatchJson::quote(predictedDay > 0 ? "random_forest_ready" : "waiting_for_data");
+  json += ",";
   json += "\"clockStatus\":";
   json += HatchJson::quote(_clock.statusText());
   json += ",";
@@ -311,14 +324,100 @@ void IncubatorController::refreshDisplayIfDue(uint32_t nowMs) {
   _lastDisplayRefreshMs = nowMs;
   _display.showStatus(
     _currentReading,
-    _settings,
-    _clock.shortTime(),
-    _networkStatus,
-    _logger.isReady() ? "OK" : "ERR",
-    _heater.isOn() || _bulb2.isOn(),
-    _fan.isOn(),
-    _turner.isOn()
+    _turner.isOn(),
+    predictedHatchDateText()
   );
+}
+
+int IncubatorController::predictedHatchDay() const {
+  if (!_currentReading.valid) {
+    return 0;
+  }
+
+  float features[] = {
+    _currentReading.temperatureC,
+    _currentReading.humidityPercent,
+    1.0f + static_cast<float>((millis() - _startedMs) / 86400000UL)
+  };
+
+  const float prediction = hatchModel.predict(features);
+  return static_cast<int>(prediction + 0.5f);
+}
+
+String IncubatorController::predictedHatchDateText() const {
+  const String iso = predictedHatchDateIso();
+
+  if (iso.length() == 0) {
+    const int day = predictedHatchDay();
+    return day > 0 ? String("Hatch: Day ") + String(day) : "Hatch: waiting";
+  }
+
+  return "Hatch: " + iso.substring(5);
+}
+
+String IncubatorController::predictedHatchDateIso() const {
+  const int predictedDay = predictedHatchDay();
+
+  if (predictedDay <= 0 || !_clock.isReady()) {
+    return "";
+  }
+
+  const DateTimeValue now = _clock.now();
+
+  if (!now.valid) {
+    return "";
+  }
+
+  const int currentDay = 1 + static_cast<int>((millis() - _startedMs) / 86400000UL);
+  const int daysUntilHatch = predictedDay > currentDay ? predictedDay - currentDay : 0;
+  const DateTimeValue hatchDate = addDays(now, daysUntilHatch);
+
+  return String(hatchDate.year) + "-" +
+    (hatchDate.month < 10 ? "0" : "") + String(hatchDate.month) + "-" +
+    (hatchDate.day < 10 ? "0" : "") + String(hatchDate.day);
+}
+
+DateTimeValue IncubatorController::addDays(const DateTimeValue& date, int days) const {
+  DateTimeValue result = date;
+
+  while (days > 0) {
+    const uint8_t monthDays = daysInMonth(result.year, result.month);
+
+    if (result.day < monthDays) {
+      result.day++;
+    } else {
+      result.day = 1;
+
+      if (result.month < 12) {
+        result.month++;
+      } else {
+        result.month = 1;
+        result.year++;
+      }
+    }
+
+    days--;
+  }
+
+  return result;
+}
+
+uint8_t IncubatorController::daysInMonth(uint16_t year, uint8_t month) const {
+  static const uint8_t monthDays[] = {
+    31, 28, 31, 30, 31, 30,
+    31, 31, 30, 31, 30, 31
+  };
+
+  if (month == 2) {
+    const bool leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+    return leap ? 29 : 28;
+  }
+
+  if (month < 1 || month > 12) {
+    return 30;
+  }
+
+  return monthDays[month - 1];
 }
 
 String IncubatorController::temperatureSummary() const {

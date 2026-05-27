@@ -1,41 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "hatchai_batches";
-
-  const incubationDays = {
-    Chicken: 21,
-    Duck: 28,
-    Quail: 17,
-    Goose: 30
-  };
-
-  const defaultBatches = [
-    {
-      id: createId(),
-      name: "Batch A-0426",
-      type: "Chicken",
-      count: 36,
-      startDate: "2026-04-20",
-      targetTemp: "37.8°C",
-      targetHumidity: "58%",
-      status: "Active",
-      notes: "Check candling status on Day 14. Maintain stable humidity and automatic egg turning.",
-      selected: true
-    },
-    {
-      id: createId(),
-      name: "Batch C-0326",
-      type: "Chicken",
-      count: 30,
-      startDate: "2026-03-25",
-      targetTemp: "37.8°C",
-      targetHumidity: "58%",
-      status: "Completed",
-      notes: "Previous completed batch.",
-      selected: false
-    }
-  ];
-
-  let batches = loadBatches();
+  const BatchStore = window.HatchBatchStore;
+  let batches = BatchStore.loadBatches();
 
   const batchModal = document.getElementById("batchModal");
   const openBatchModal = document.getElementById("openBatchModal");
@@ -47,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const batchName = document.getElementById("batchName");
   const eggType = document.getElementById("eggType");
   const eggCount = document.getElementById("eggCount");
+  const laidDate = document.getElementById("laidDate");
   const startDate = document.getElementById("startDate");
   const targetTemp = document.getElementById("targetTemp");
   const targetHumidity = document.getElementById("targetHumidity");
@@ -59,95 +25,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetFormBtn = document.getElementById("resetFormBtn");
   const saveBatchBtn = document.getElementById("saveBatchBtn");
 
-  function loadBatches() {
-    const saved = loadData(STORAGE_KEY);
-
-    if (!saved) {
-      saveData(STORAGE_KEY, defaultBatches);
-      return defaultBatches;
-    }
-
-    return saved;
-  }
-
   function saveBatches() {
-    saveData(STORAGE_KEY, batches);
-  }
-
-  function createId() {
-    if (crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-
-    return String(Date.now() + Math.random());
+    BatchStore.saveBatches(batches);
   }
 
   function formatDate(dateInput) {
-    const date = new Date(dateInput + "T00:00:00");
-
-    if (Number.isNaN(date.getTime())) {
-      return "Not set";
-    }
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric"
-    });
+    return BatchStore.formatDate(dateInput);
   }
 
   function calculateBatch(batch) {
-    const totalDays = incubationDays[batch.type] || 21;
-    const started = new Date(batch.startDate + "T00:00:00");
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-
-    if (Number.isNaN(started.getTime())) {
-      return {
-        hatchDate: "Not set",
-        progress: 0,
-        dayText: "Day 0 of " + totalDays,
-        daysRemaining: "Start date missing"
-      };
-    }
-
-    const hatch = new Date(started);
-    hatch.setDate(started.getDate() + totalDays);
-
-    const elapsedMs = today - started;
-    const elapsedDays = Math.max(0, Math.floor(elapsedMs / 86400000));
-
-    const progress = batch.status === "Completed"
-      ? 100
-      : Math.min(100, Math.round((elapsedDays / totalDays) * 100));
-
-    const remaining = Math.max(0, totalDays - elapsedDays);
-
-    return {
-      hatchDate: formatDate(hatch.toISOString().slice(0, 10)),
-      progress,
-      dayText: "Day " + Math.min(elapsedDays, totalDays) + " of " + totalDays,
-      daysRemaining: remaining === 0 ? "Hatch due" : remaining + " days left"
-    };
+    return BatchStore.calculateBatch(batch);
   }
 
   function getStatusClass(status) {
-    if (status === "Active" || status === "Completed") {
-      return "status-ok";
-    }
-
-    if (status === "Paused") {
-      return "status-warning";
-    }
-
-    return "status-alert";
+    return BatchStore.getStatusClass(status);
   }
 
   function getSelectedBatch() {
-    return batches.find(batch => batch.selected) ||
-      batches.find(batch => batch.status === "Active") ||
-      batches[0];
+    return BatchStore.getSelectedBatch(batches);
+  }
+
+  function getGeneratedBatchName() {
+    return BatchStore.getNextBatchName(batches);
   }
 
   function renderTable() {
@@ -156,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (batches.length === 0) {
       batchTableBody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-row">
+          <td colspan="9" class="empty-row">
             No batch records yet. Click Add Batch to create one.
           </td>
         </tr>
@@ -178,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><strong>${batch.name}</strong></td>
         <td><span class="egg-type"><span class="egg-dot"></span>${batch.type}</span></td>
         <td>${batch.count}</td>
+        <td>${formatDate(batch.laidDate)}</td>
         <td>${formatDate(batch.startDate)}</td>
         <td>${batchInfo.hatchDate}</td>
         <td>${batchInfo.progress}%</td>
@@ -213,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("summaryBatch").textContent = "None";
       document.getElementById("summaryType").textContent = "None";
       document.getElementById("summaryCount").textContent = "0 eggs";
+      document.getElementById("summaryLaid").textContent = "Not set";
       document.getElementById("summaryStarted").textContent = "Not set";
       document.getElementById("summaryHatch").textContent = "Not set";
       document.getElementById("summaryStatus").innerHTML = `<span class="status-pill status-warning">No Data</span>`;
@@ -223,8 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("currentBatchName").textContent = selectedBatch.name;
     document.getElementById("currentBatchMeta").textContent =
-      `${selectedBatch.type} eggs • ${batchInfo.dayText} • Started ${formatDate(selectedBatch.startDate)}`;
-
+      `${selectedBatch.type} eggs - ${batchInfo.dayText} - Laid ${formatDate(selectedBatch.laidDate)} - Started ${formatDate(selectedBatch.startDate)}`;
     document.getElementById("progressBar").style.width = batchInfo.progress + "%";
     document.getElementById("progressPercent").textContent = batchInfo.progress + "% complete";
     document.getElementById("daysRemaining").textContent = batchInfo.daysRemaining;
@@ -232,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("summaryBatch").textContent = selectedBatch.name;
     document.getElementById("summaryType").textContent = selectedBatch.type;
     document.getElementById("summaryCount").textContent = selectedBatch.count + " eggs";
+    document.getElementById("summaryLaid").textContent = formatDate(selectedBatch.laidDate);
     document.getElementById("summaryStarted").textContent = formatDate(selectedBatch.startDate);
     document.getElementById("summaryHatch").textContent = batchInfo.hatchDate;
     document.getElementById("summaryStatus").innerHTML =
@@ -264,9 +165,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setFormDisabled(disabled) {
     [
-      batchName,
       eggType,
       eggCount,
+      laidDate,
       startDate,
       targetTemp,
       targetHumidity,
@@ -277,6 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
       input.disabled = disabled;
     });
 
+    batchName.disabled = disabled;
+    batchName.readOnly = true;
     saveBatchBtn.style.display = disabled ? "none" : "inline-flex";
     resetFormBtn.style.display = disabled ? "none" : "inline-flex";
   }
@@ -284,8 +187,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function fillForm(batch) {
     batchId.value = batch.id;
     batchName.value = batch.name;
-    eggType.value = batch.type;
+    batchName.readOnly = true;
+    eggType.value = "Chicken";
     eggCount.value = batch.count;
+    laidDate.value = batch.laidDate || "";
     startDate.value = batch.startDate;
     targetTemp.value = batch.targetTemp;
     targetHumidity.value = batch.targetHumidity;
@@ -299,11 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
     batchForm.reset();
 
     batchId.value = "";
-    batchName.value = "";
+    batchName.value = getGeneratedBatchName();
+    batchName.readOnly = true;
     eggType.value = "Chicken";
     eggCount.value = "";
+    laidDate.value = new Date().toISOString().slice(0, 10);
     startDate.value = new Date().toISOString().slice(0, 10);
-    targetTemp.value = "37.8°C";
+    targetTemp.value = "37.8\u00B0C";
     targetHumidity.value = "58%";
     batchStatus.value = "Active";
     isSelected.value = "yes";
@@ -314,10 +221,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getFormData() {
     return {
-      id: batchId.value || createId(),
-      name: batchName.value.trim(),
-      type: eggType.value,
+      id: batchId.value || BatchStore.createId(),
+      name: batchName.value.trim() || getGeneratedBatchName(),
+      type: "Chicken",
       count: Number(eggCount.value),
+      laidDate: laidDate.value,
       startDate: startDate.value,
       targetTemp: targetTemp.value.trim(),
       targetHumidity: targetHumidity.value.trim(),
@@ -328,16 +236,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function validateBatch(batch) {
-    if (!batch.name) {
-      return "Batch name is required.";
-    }
-
     if (!batch.count || batch.count < 1) {
       return "Egg count must be at least 1.";
     }
 
+    if (!batch.laidDate) {
+      return "Egg laid date is required.";
+    }
+
     if (!batch.startDate) {
       return "Start date is required.";
+    }
+
+    if (batch.laidDate > batch.startDate) {
+      return "Egg laid date cannot be after the incubation start date.";
     }
 
     return "";
@@ -359,6 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     saveBatches();
+    batches = BatchStore.loadBatches();
     renderApp();
 
     return isUpdate;
@@ -371,6 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
 
     saveBatches();
+    batches = BatchStore.loadBatches();
     renderApp();
   }
 
@@ -401,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     batchModalTitle.textContent = "Edit Batch";
-    batchModalDescription.textContent = "Update the selected batch details.";
+    batchModalDescription.textContent = "Update the selected batch details. The generated batch name stays fixed.";
     formStatus.textContent = "Editing";
     formStatus.className = "status-pill status-warning";
 
@@ -432,6 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         saveBatches();
+        batches = BatchStore.loadBatches();
         renderApp();
         window.HatchToast.success("Batch deleted.");
       }

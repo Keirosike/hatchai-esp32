@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>HatchAI Batch CRUD</title>
-  <link rel="icon" href="assets/images/fortitle.webp" type="image/webp" />
+  <link rel="icon" href="a/images/fortitle.webp" type="image/webp" />
 
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -19,7 +19,7 @@
   <nav class="navbar">
     <div class="nav-container">
       <div class="logo-wrap">
-        <img src="assets/images/hatchai-logo.webp" alt="HatchAI Logo">
+        <img src="a/images/hatchai-logo.webp" alt="HatchAI Logo">
         <div class="logo">Hatch<span>AI</span></div>
       </div>
 
@@ -99,6 +99,10 @@
             <strong id="summaryCount">0 eggs</strong>
           </li>
           <li>
+            <span>Egg laid date</span>
+            <strong id="summaryLaid">Not set</strong>
+          </li>
+          <li>
             <span>Started</span>
             <strong id="summaryStarted">Not set</strong>
           </li>
@@ -133,6 +137,7 @@
               <th>Batch</th>
               <th>Egg Type</th>
               <th>Eggs</th>
+              <th>Laid Date</th>
               <th>Start Date</th>
               <th>Expected Hatch</th>
               <th>Progress</th>
@@ -169,18 +174,13 @@
         <input type="hidden" id="batchId">
 
         <div class="field">
-          <label for="batchName">Batch Name</label>
-          <input type="text" id="batchName" placeholder="Example: Batch A-0426" required>
+          <label for="batchName">Generated Batch Name</label>
+          <input type="text" id="batchName" value="Chicken Batch 001" readonly>
         </div>
 
         <div class="field">
           <label for="eggType">Egg Type</label>
-          <select id="eggType">
-            <option>Chicken</option>
-            <option>Duck</option>
-            <option>Quail</option>
-            <option>Goose</option>
-          </select>
+          <input type="text" id="eggType" value="Chicken" readonly>
         </div>
 
         <div class="field">
@@ -189,7 +189,12 @@
         </div>
 
         <div class="field">
-          <label for="startDate">Start Date</label>
+          <label for="laidDate">Egg Laid Date</label>
+          <input type="date" id="laidDate" required>
+        </div>
+
+        <div class="field">
+          <label for="startDate">Incubation Start Date</label>
           <input type="date" id="startDate" required>
         </div>
 
@@ -249,6 +254,8 @@
 
   <script src="js/app.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/authSession.js"></script>
+  <script src="js/batchStore.js"></script>
   <script src="js/modal.js"></script>
   <script src="js/toastNotification.js"></script>
   <script src="js/batch.js"></script>

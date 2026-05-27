@@ -163,6 +163,28 @@
   margin-top: 14px;
 }
 
+.wifi-connect-form {
+  margin-top: 16px;
+}
+
+.wifi-password-wrap {
+  position: relative;
+}
+
+.wifi-password-wrap .input-box {
+  padding-right: 78px;
+}
+
+.wifi-password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  width: auto;
+  min-width: 62px;
+  padding: 8px 11px;
+  transform: translateY(-50%);
+}
+
 .wifi-info-box {
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -180,6 +202,17 @@
   font-size: 18px;
   font-weight: 600;
   color: var(--black);
+}
+
+.wifi-card-status {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-soft);
+  color: var(--gray);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .small-note {
@@ -227,5 +260,9 @@
   .password-wrap {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .wifi-password-toggle {
+    width: auto;
   }
 }

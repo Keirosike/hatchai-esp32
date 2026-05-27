@@ -41,6 +41,11 @@ private:
   void maybeStartScheduledTurn(uint32_t nowMs);
   void refreshDisplayIfDue(uint32_t nowMs);
 
+  int predictedHatchDay() const;
+  String predictedHatchDateText() const;
+  String predictedHatchDateIso() const;
+  DateTimeValue addDays(const DateTimeValue& date, int days) const;
+  uint8_t daysInMonth(uint16_t year, uint8_t month) const;
   String temperatureSummary() const;
   String humiditySummary() const;
   String formatDuration(uint32_t durationMs) const;

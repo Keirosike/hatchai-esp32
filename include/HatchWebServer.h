@@ -17,7 +17,12 @@ private:
   void handleApiData();
   void handleApiControl();
   void handleApiTurn();
+  void handleSessionStart();
+  void handleSessionKeepAlive();
+  void handleSessionEnd();
+  void handleSessionStatus();
   void handleWifiScan();
+  void handleWifiConnect();
   void handleOptions();
   void handleStaticFile();
   void sendJson(const String& payload, int statusCode = 200);
@@ -28,8 +33,13 @@ private:
   bool parseBoolArg(const String& name, bool fallback);
   float parseFloatArg(const String& name, float fallback);
   uint16_t parseMinutesArg(const String& name, uint16_t fallback);
+  bool hasActiveSession() const;
+  void refreshSession(const String& token, const String& username);
 
   WebServer _server;
   IncubatorController& _controller;
   NetworkManager& _network;
+  String _sessionToken;
+  String _sessionUsername;
+  unsigned long _sessionLastSeenMs = 0;
 };

@@ -59,42 +59,29 @@ void LcdStatusDisplay::showBoot(const String& message) {
 
   printLine(0, "HatchAI Incubator");
   printLine(1, message);
-  printLine(2, "Waiting for sensor");
-  printLine(3, "Web server starting");
+  printLine(2, "Sensor starting");
+  printLine(3, "Prediction ready");
 }
 
 void LcdStatusDisplay::showStatus(
   const SensorReading& reading,
-  const ControlSettings& settings,
-  const String& clockText,
-  const String& wifiStatus,
-  const String& sdStatus,
-  bool heaterOn,
-  bool fanOn,
-  bool turnerOn
+  bool turnerOn,
+  const String& hatchDateText
 ) {
   if (!_ready) {
     return;
   }
 
-  String line0 = "HatchAI " + clockText;
-  String line1 = "T:";
-  String line2 = "Fan:";
-  String line3 = "SD:";
+  String line0 = "Temp: --.-C";
+  String line1 = "Hum : --%";
 
   if (reading.valid) {
-    line1 += String(reading.temperatureC, 1) + "C H:" + String(reading.humidityPercent, 0) + "%";
-  } else {
-    line1 += "--.-C H:--%";
+    line0 = "Temp: " + String(reading.temperatureC, 1) + "C";
+    line1 = "Hum : " + String(reading.humidityPercent, 0) + "%";
   }
 
-  line1 += heaterOn ? " Heat:ON" : " Heat:OFF";
-  line2 += fanOn ? "ON " : "OFF";
-  line2 += turnerOn ? " Turn:ON" : " Turn:OFF";
-  line2 += settings.autoMode ? " A" : " M";
-  line3 += sdStatus;
-  line3 += " WiFi:";
-  line3 += wifiStatus;
+  const String line2 = turnerOn ? "Egg Turn: ON" : "Egg Turn: OFF";
+  const String line3 = hatchDateText.length() > 0 ? hatchDateText : "Hatch: waiting";
 
   printLine(0, line0);
   printLine(1, line1);

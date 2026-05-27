@@ -128,11 +128,10 @@ const HatchSettings = {
     this.applySettings(DEFAULT_SETTINGS);
 
     HatchStorage.remove("hatchaiSettings");
-    HatchStorage.remove("hatchaiWifiStatus");
-    HatchStorage.remove("hatchaiSelectedWifi");
+    HatchStorage.remove("hatchaiWifi");
 
-    if (window.HatchWifi?.setEspWifiState) {
-      HatchWifi.setEspWifiState("Disconnected", "status-alert", "---", "---");
+    if (window.HatchWifi?.resetWifiState) {
+      HatchWifi.resetWifiState();
     }
 
     this.setStatus("Settings reset to defaults.", "#2563EB", "info");
@@ -165,6 +164,11 @@ const HatchSettings = {
   },
 
   logoutUser() {
+    if (window.HatchAuthSession?.logout) {
+      HatchAuthSession.logout();
+      return;
+    }
+
     window.location.href = "index.html";
   },
 

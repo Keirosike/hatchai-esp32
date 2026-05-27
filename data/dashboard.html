@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>HatchAI Dashboard</title>
-  <link rel="icon" href="assets/images/fortitle.webp" type="image/webp" />
+  <link rel="icon" href="a/images/fortitle.webp" type="image/webp" />
 
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -17,7 +17,7 @@
   <nav class="navbar">
     <div class="nav-container">
       <div class="logo-wrap">
-        <img src="assets/images/hatchai-logo.webp" alt="HatchAI Logo">
+        <img src="a/images/hatchai-logo.webp" alt="HatchAI Logo">
         <div class="logo">Hatch<span>AI</span></div>
       </div>
 
@@ -90,8 +90,31 @@
 
       <div class="card wide-card">
         <div class="card-title">Hatch Timing Model</div>
-        <div class="prediction-value" id="hatchDayValue">Training pending</div>
-        <div class="subtext" id="hatchDateValue">Prediction skipped until dataset training is ready</div>
+        <div class="prediction-value" id="hatchDayValue">Random Forest</div>
+        <div class="subtext" id="hatchDateValue">Waiting for ESP32 sensor data</div>
+
+        <div class="prediction-meta-grid">
+          <div>
+            <span>Active chicken batch</span>
+            <strong id="activeBatchValue">No batch selected</strong>
+          </div>
+          <div>
+            <span>Egg laid date</span>
+            <strong id="dashboardLaidDate">Not set</strong>
+          </div>
+          <div>
+            <span>Incubation start</span>
+            <strong id="dashboardStartDate">Not set</strong>
+          </div>
+          <div>
+            <span>Batch hatch date</span>
+            <strong id="dashboardExpectedHatch">Not set</strong>
+          </div>
+          <div>
+            <span>Batch progress</span>
+            <strong id="dashboardBatchProgress">0% complete</strong>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -143,6 +166,9 @@
   </main>
 
   <script src="js/app.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/authSession.js"></script>
+  <script src="js/batchStore.js"></script>
   <script src="js/espApi.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
